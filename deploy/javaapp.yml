@@ -56,4 +56,4 @@
       shell: "cd {{ app_dest }} && echo test > out.txt && chmod 0777 out.txt"
 
     - name: Run app
-      shell: "cd {{ app_dest }}/{{ repo_name }} && mvn exec:java -Dexec.mainClass=ru.sbt.mipt.oop.Application -Dexec.outputFile={{ app_dest }}/out.txt &> {{ app_dest }}/out.txt"
+      shell: "cd {{ app_dest }}/{{ repo_name }} && mvn exec:java -Dexec.mainClass=Calculator -Dexec.outputFile={{ app_dest }}/out.txt &> {{ app_dest }}/out.txt"

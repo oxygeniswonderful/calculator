@@ -44,7 +44,7 @@
         state: directory
 
     - name: Clone app repository
-      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch calculator --single-branch https://github.com/oxygeniswonderful/calculator" #works only with removing app the directory step
+      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch main --single-branch https://github.com/oxygeniswonderful/calculator/main" #works only with removing app the directory step
       
     
     - name: Building app to /target folder

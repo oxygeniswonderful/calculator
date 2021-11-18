@@ -1,15 +1,12 @@
 ---
 - hosts: all
   become: yes
-  ansible_become_method: sudo
-  ansible_become_pass: "cHONtic"
   vars:
     app_dest: /home/mftiedu/David_Oxygen
     repo_name: calculator
     repo_url: https://github.com/oxygeniswonderful/calculator
     packages:
       - git
-  
       - maven
   tasks:
     - name: Run apt-update
@@ -38,23 +35,23 @@
         - "java-11-openjdk-devel"
       when: ansible_os_family == "RedHat"
     
+    - name: Remove app directory
+      shell: "rm -rf {{ app_dest }}"
+    
     - name: Create app directory 
       file:
         path: "{{ app_dest }}"
         state: directory
 
     - name: Clone app repository
-      ansible.builtin.git:
-        repo: "{{ repo_url }}"
-        dest: "{{ app_dest }}/{{ repo_name }}"
-        single_branch: yes
-        version: main
-        force: yes
+      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch calculator --single-branch https://github.com/oxygeniswonderful/calculator" #works only with removing app the directory step
+      
     
     - name: Building app to /target folder
       shell: "cd {{ app_dest }}/{{ repo_name}} && mvn clean install"
 
-    
+    #- name: Making unit tests
+        #shell: mvn test
     - name: make run output file
       shell: "cd {{ app_dest }} && echo test > out.txt && chmod 0777 out.txt"
 

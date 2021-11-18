@@ -1,7 +1,6 @@
 ---
 - hosts: all
   become: yes
-  ansible_become: yes
   ansible_become_method: sudo
   ansible_become_pass: "{{ vault_ansible_password }}"
   vars:

@@ -1,59 +1,61 @@
 ---
-- hosts: all
-  become: yes
-  vars:
-    app_dest: /home/mftiedu/David_Oxygen
-    repo_name: calculator
-    repo_url: https://github.com/oxygeniswonderful/calculator
-    packages:
-      - git
-      - maven
+
+- name: Calculator
+  hosts: all
+  become: no
+  
   tasks:
-    - name: Run apt-update
-      apt: update_cache=yes
-      when: ansible_os_family == "Debian"
-
-    - name: Update yum
-      yum: update_cache=yes
-      when: ansible_os_family == "RedHat"
-
-    - name: Install packages on Debian  
-      apt: 
-        name: "{{ item }}"
-        state: present
-      with_items: 
-        - "{{ packages }}"
-        - "openjdk-11-jdk"
-      when: ansible_os_family == "Debian"
-
-    - name: Install packages on CentOS
-      yum:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - "{{ packages }}"
-        - "java-11-openjdk-devel"
-      when: ansible_os_family == "RedHat"
-    
-    - name: Remove app directory
-      shell: "rm -rf {{ app_dest }}"
-    
-    - name: Create app directory 
-      file:
-        path: "{{ app_dest }}"
-        state: directory
-
-    - name: Clone app repository
-      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch main --single-branch https://github.com/oxygeniswonderful/calculator/main" #works only with removing app the directory step
+    - name: system os detection 
+      debug: var=ansible_os_family
       
+    - name: Check Java version
+      shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+      register: java_version
+      
+    - name: delete a directory if it exists
+      file:
+        path: /home/mftiedu/Calculator
+        state: absent
+      become: yes
+      
+    - name: Create a directory for project files
+      file:
+        path: /home/mftiedu/Calculator
+        state: directory
+        mode: '0777'
+      become: yes
     
-    - name: Building app to /target folder
-      shell: "cd {{ app_dest }}/{{ repo_name}} && mvn clean install"
-
-    #- name: Making unit tests
-        #shell: mvn test
-    - name: make run output file
-      shell: "cd {{ app_dest }} && echo test > out.txt && chmod 0777 out.txt"
-
-    - name: Run app
-      shell: "cd {{ app_dest }}/{{ repo_name }} && mvn exec:java -Dexec.mainClass=Calculator -Dexec.outputFile={{ app_dest }}/out.txt &> {{ app_dest }}/out.txt"
+    - name: Copy jar file
+      copy:
+        src: ./target/json-reader-1.0-SNAPSHOT.jar
+        dest: /home/mftiedu/Calculator/json-reader-1.0-SNAPSHOT.jar
+        
+        
+    - name: Create a directory for libs
+      file:
+        path: /home/mftiedu/Calculator
+        state: directory
+        mode: '0777'
+      become: yes
+      
+    - name: Copy libs
+      copy:
+        src: ./target/libs
+        dest: /home/mftiedu/Calculator
+        directory_mode: yes
+      
+    - block: #======Install java======
+      - name: CentOs java installation
+        yum: update_cache=yes name=java-1.8.0-openjdk-devel state=latest
+        when: ansible_os_family == "RedHat"
+      - name: Debian java installation
+        apt: update_cache=yes name=openjdk-8-jdk-headless state=latest
+        when: ansible_os_family == "Debian"
+      when: java_version.stdout == "" or java_version.stdout is version('1.8', '<')
+      become: yes
+      
+    - name: launch project
+      shell: |
+        cd /home/mftiedu/Calculator/
+        java -jar json-reader-1.0-SNAPSHOT.jar
+...

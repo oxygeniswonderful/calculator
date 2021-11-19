@@ -4,7 +4,7 @@
   become: yes
   vars:
     app_dest: /home/mftiedu/David_Oxygen
-    repo_name: main
+    repo_name: calculator
     repo_url: https://github.com/oxygeniswonderful/calculator
     packages:
       - git
@@ -45,7 +45,7 @@
         state: directory
 
     - name: Clone app repository
-      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch main --single-branch https://github.com/oxygeniswonderful/calculator/main"
+      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch calculator --single-branch https://github.com/oxygeniswonderful/calculator"
     
     - name: Building app to /target folder
       shell: "cd {{ app_dest }}/{{ repo_name}} && mvn clean install"

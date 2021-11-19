@@ -1,59 +1,14 @@
----
-- hosts: all
-  #gather_facts: no
-  become: yes
-  vars:
-    app_dest: /home/mftiedu/David_Oxygen
-    repo_name: calculator
-    repo_url: https://github.com/oxygeniswonderful/calculator
-    packages:
-      - git
-      - maven
+- name: Deploy java app
+  hosts: all
   tasks:
-    - name: Run apt-update
-      apt: update_cache=yes
-      when: ansible_os_family == "Debian"
+    - name: set src directory
+      set_fact:
+        task_src: /home/mftiedu/David_Oxygen/task_src
 
-    - name: Update yum
-      yum: update_cache=yes
-      when: ansible_os_family == "RedHat"
+    - name: create task directory
+      file: state=directory path={{ task_src }}
 
-    - name: Install packages on Debian  
-      apt: 
-        name: "{{ item }}"
-        state: present
-      with_items: 
-        - "{{ packages }}"
-        - "openjdk-11-jdk"
-      when: ansible_os_family == "Debian"
-
-    - name: Install packages on CentOS
-      yum:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - "{{ packages }}"
-        - "java-11-openjdk-devel"
-      when: ansible_os_family == "RedHat"
-    
-    - name: Remove app directory
-      shell: "rm -rf {{ app_dest }}"
-    
-    - name: Create app directory 
-      file:
-        path: "{{ app_dest }}"
-        state: directory
-
-    - name: Clone app repository
-      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch calculator --single-branch https://github.com/oxygeniswonderful/calculator"
-    
-    - name: Building app to /target folder
-      shell: "cd {{ app_dest }}/{{ repo_name}} && mvn clean install"
-
-    #- name: Making unit tests
-        #shell: mvn test
-    - name: make run output file
-      shell: "cd {{ app_dest }} && echo test > out.txt && chmod 0777 out.txt"
-
-    - name: Run app
-      shell: "cd {{ app_dest }}/{{ repo_name }} && mvn exec:java -Dexec.mainClass=Calculator -Dexec.outputFile={{ app_dest }}/out.txt &> {{ app_dest }}/out.txt"
+    - name: copy src files
+      copy:
+        src: "../target/simple_calc-1.0-SNAPSHOT.jar"
+        dest: "{{ task_src }}"

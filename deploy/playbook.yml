@@ -4,7 +4,7 @@
   vars_files:
     - ./server_vars.yml
   vars:
-    jar: 'java-1.0-SNAPSHOT.jar'
+    jar: 'Calculator-1.0-SNAPSHOT.jar'
   tasks:
     - name: dir exists
       file: path=/David_Oxygen/ state=directory

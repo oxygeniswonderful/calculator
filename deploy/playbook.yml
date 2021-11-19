@@ -1,17 +1,59 @@
 ---
 - hosts: all
+  #gather_facts: no
   become: yes
-  vars_files:
-    - ./server_vars.yml
   vars:
-    jar: 'Calculator-1.0-SNAPSHOT.jar'
+    app_dest: /home/mftiedu/David_Oxygen
+    repo_name: main
+    repo_url: https://github.com/oxygeniswonderful/calculator
+    packages:
+      - git
+      - maven
   tasks:
-    - name: dir exists
-      file: path=/David_Oxygen/ state=directory
-    - name: copy jar
-      copy:
-        src: './../java/target/{{ jar }}'
-        dest: '/David_Oxygen/{{ jar }}'
-        mode: '0755'
-    - name: run jar
-      shell: java -jar /David_Oxygen/{{ jar }} > /David_Oxygen/result.txt
+    - name: Run apt-update
+      apt: update_cache=yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update yum
+      yum: update_cache=yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install packages on Debian  
+      apt: 
+        name: "{{ item }}"
+        state: present
+      with_items: 
+        - "{{ packages }}"
+        - "openjdk-11-jdk"
+      when: ansible_os_family == "Debian"
+
+    - name: Install packages on CentOS
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ packages }}"
+        - "java-11-openjdk-devel"
+      when: ansible_os_family == "RedHat"
+    
+    - name: Remove app directory
+      shell: "rm -rf {{ app_dest }}"
+    
+    - name: Create app directory 
+      file:
+        path: "{{ app_dest }}"
+        state: directory
+
+    - name: Clone app repository
+      shell: "cd /home/mftiedu/David_Oxygen && git clone --branch main --single-branch https://github.com/oxygeniswonderful/calculator/main"
+    
+    - name: Building app to /target folder
+      shell: "cd {{ app_dest }}/{{ repo_name}} && mvn clean install"
+
+    #- name: Making unit tests
+        #shell: mvn test
+    - name: make run output file
+      shell: "cd {{ app_dest }} && echo test > out.txt && chmod 0777 out.txt"
+
+    - name: Run app
+      shell: "cd {{ app_dest }}/{{ repo_name }} && mvn exec:java -Dexec.mainClass=Calculator -Dexec.outputFile={{ app_dest }}/out.txt &> {{ app_dest }}/out.txt"

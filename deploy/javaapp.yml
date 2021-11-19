@@ -1,8 +1,17 @@
-- name: Calculator
-  hosts: all
-
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - ./server_vars.yml
+  vars:
+    jar: 'java-1.0-SNAPSHOT.jar'
   tasks:
-    - name: copy jar file
+    - name: dir exists
+      file: path=/David_Oxygen/ state=directory
+    - name: copy jar
       copy:
-        src: "{{ playbook_dir }}/../target/Calculator.jar"
-        dest: "/home/mftiedu/dv_jar/Calculator.jar"
+        src: './../java/target/{{ jar }}'
+        dest: '/David_Oxygen/{{ jar }}'
+        mode: '0755'
+    - name: run jar
+      shell: java -jar /David_Oxygen/{{ jar }} > /David_Oxygen/result.txt

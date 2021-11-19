@@ -6,12 +6,6 @@ public class Calculator {
 
         Calculator mainClass = new Calculator();
 
-        System.out.println(mainClass.plus(x,y));
-        System.out.println(mainClass.minus(x,y));
-
-
-
-
     }
 
     public int plus(int number1, int number2) {

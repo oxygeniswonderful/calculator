@@ -1,13 +1,6 @@
-all:vars]
-ansible_sudo_pass=cHONtic
+[centos_group]
+cent_os_server.domain ansible_ssh_host=194.87.57.31
 
-[centos_servers]
-centos8  ansible_host=194.87.57.31 virtual_domain=mywebserver.centos
-
-[debian_servers]
-debian10 ansible_host=194.87.107.68 virtual_domain=mywebserver.debian
-
-[linux_servers:children]
-centos_servers
-debian_servers
+[debian_group]
+debian_server.domain ansible_ssh_host=194.87.107.68
 
